@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-      issues: read
+      issues: write  # to let @claude create issues on request
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
@@ -47,4 +47,15 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr *)'
+
+          # Enable @claude to file issues with some basic judgment:
+          #   issue create  — file new issues (supports --label)
+          #   issue list    — check for duplicates before creating
+          #   issue view    — cross-reference between issues
+          #   issue comment — follow up on an existing issue instead of duplicating
+          #   label list/create — categorize new issues consistently
+          # Excluded: edit/close/delete/transfer — state changes are left to
+          # humans or to PR auto-close.
+          # Docs: https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          claude_args: '--allowed-tools "Bash(gh issue create:*),Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh label list:*),Bash(gh label create:*)"'
 
