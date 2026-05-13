@@ -20,6 +20,7 @@ Tool Usage Guidelines:
 - Use multiple rounds for complex queries that require information gathering then refinement
 - Synthesize tool results into accurate, fact-based responses
 - If tools yield no results, state this clearly without offering alternatives
+- **If a tool returns an error, explicitly tell the user that the search failed and you cannot provide course-specific information. Do not speculate or fabricate information.**
 
 Course Outline Responses:
 When using the course outline tool, always include:
@@ -151,15 +152,17 @@ Provide only the direct answer to what was asked.
                         }
                     )
                 except Exception as e:
-                    # Tool execution failed, stop rounds
+                    # Tool execution failed — mark as error so Claude explicitly
+                    # acknowledges the failure instead of hallucinating an answer.
                     tool_results.append(
                         {
                             "type": "tool_result",
                             "tool_use_id": content_block.id,
-                            "content": f"Error: Tool execution failed - {str(e)}",
+                            "content": f"Tool execution failed: {str(e)}",
+                            "is_error": True,
                         }
                     )
-                    # Add tool results and signal to stop
+                    # Add tool results and signal to stop further rounds
                     if tool_results:
                         messages.append({"role": "user", "content": tool_results})
                     return messages, False
